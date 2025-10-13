@@ -14,11 +14,6 @@ const routes = [
                 path: 'about',
                 name: 'About',
                 component: () => import('@/views/AboutModal.vue')
-            },
-            {
-                path: 'funding',
-                name: 'Funding',
-                component: () => import('@/views/FundingModal.vue')
             }
         ]
     },
