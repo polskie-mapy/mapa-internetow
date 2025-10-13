@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 if [ -z "$FA_ENCRYPTION_KEY" ]; then
@@ -6,20 +6,19 @@ if [ -z "$FA_ENCRYPTION_KEY" ]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 ENCRYPTED_DIR="$PROJECT_DIR/.fontawesome-encrypted"
 NODE_MODULES="$PROJECT_DIR/node_modules"
 
-FA_PACKAGES=("@fortawesome/pro-regular-svg-icons" "@fortawesome/pro-solid-svg-icons")
-
 mkdir -p "$ENCRYPTED_DIR"
 
-for package in "${FA_PACKAGES[@]}"; do
-  [ ! -d "$NODE_MODULES/$package" ] && echo "Error: $package not found" && exit 1
-  output="$ENCRYPTED_DIR/$(echo $package | tr '/' '-').tar.gz.enc"
-  (cd "$NODE_MODULES" && tar -czf - "./$package") | openssl enc -aes-256-cbc -salt -pbkdf2 -pass env:FA_ENCRYPTION_KEY -out "$output"
-  echo "✓ $package"
+for package in pro-regular-svg-icons pro-solid-svg-icons; do
+  package_path="$NODE_MODULES/@fortawesome/$package"
+  [ ! -d "$package_path" ] && echo "Error: @fortawesome/$package not found" && exit 1
+  output="$ENCRYPTED_DIR/@fortawesome-$package.tar.gz.enc"
+  (cd "$NODE_MODULES" && tar -czf - "./@fortawesome/$package") | openssl enc -aes-256-cbc -salt -pbkdf2 -pass env:FA_ENCRYPTION_KEY -out "$output"
+  echo "✓ @fortawesome/$package"
 done
 
 echo "Done. Commit .fontawesome-encrypted/ to repo"
