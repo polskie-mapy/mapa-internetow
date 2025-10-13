@@ -89,6 +89,7 @@
           </ul>
           <div class="flex gap-x-5 mt-5 justify-center text-app">
             <router-link
+              v-if="false"
               :to="{ name: 'Funding' }"
               class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
             >
