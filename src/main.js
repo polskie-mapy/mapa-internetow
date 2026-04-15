@@ -15,6 +15,7 @@ import 'virtual:windi.css';
 import 'virtual:windi-devtools';
 import '@/assets/ui.css';
 import { APP_VERSION } from './app-helpers';
+import { initAnalyticsNavigationTracking, initAnalyticsQueue } from './analytics';
 
 library.add(fas, far, fab);
 Vue.component('FaIcon', FontAwesomeIcon);
@@ -23,6 +24,8 @@ Vue.config.productionTip = false;
 
 Vue.use(PortalVue);
 Vue.use(VueHelpers);
+initAnalyticsNavigationTracking();
+initAnalyticsQueue();
 
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
     Sentry.init({

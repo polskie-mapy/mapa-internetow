@@ -126,6 +126,7 @@
             class="rounded hover:outline-2 hover:outline hover:outline-offset-1 hover:outline-app relative h-36 w-48 md:justify-self-auto justify-self-center col-span-2 md:col-span-1"
             :href="ytLink"
             target="_blank"
+            @click="trackOutboundClick('yt')"
           >
             <VideoThumbnail
               :target-url="ytLink"
@@ -158,7 +159,7 @@
             <p class="break-all max-h-40 overflow-y-auto dark:text-gray-200">
               {{ point.excerpt }}
             </p>
-            <a class="text-app hover:underline" :href="mapLink">
+            <a class="text-app hover:underline" :href="mapLink" @click="trackOutboundClick('map')">
               <fa-icon 
                 icon="fa-solid fa-link"
                 fixed-width
@@ -202,6 +203,7 @@
                 class="bg-point-details-link-var px-3 py-1 text-white outline-2 hover:outline-offset-1 hover:outline outline-app rounded"
                 :title="link.tooltip"
                 target="_blank"
+                @click="trackOutboundClick(link.type)"
               >
                 <fa-icon
                   :icon="link.type | linkTypeIcon"
@@ -244,6 +246,7 @@ import {DateTime} from 'luxon';
 import {mapGetters} from 'vuex';
 import store from "@/store";
 import VideoThumbnail from "@/components/VideoThumbnail.vue";
+import { trackEvent } from '@/analytics';
 
 export default {
     name: 'PointDetails',
@@ -255,6 +258,18 @@ export default {
 
         if (store.getters.point(selectedPointId)) {
             store.commit('setCurrentPoint', store.getters.point(selectedPointId));
+            const point = store.getters.point(selectedPointId);
+            trackEvent('point_open', {
+                point_id: point.id,
+                map_id: point.mapId,
+                source: to.query.source || 'url',
+            });
+        } else {
+            trackEvent('point_not_found', {
+                point_id: selectedPointId,
+                map_id: Number.parseInt(to.params.mapId, 10),
+                source: to.query.source || 'url',
+            });
         }
 
         next();
@@ -264,6 +279,18 @@ export default {
 
         if (store.getters.point(selectedPointId)) {
             store.commit('setCurrentPoint', store.getters.point(selectedPointId));
+            const point = store.getters.point(selectedPointId);
+            trackEvent('point_open', {
+                point_id: point.id,
+                map_id: point.mapId,
+                source: to.query.source || 'url',
+            });
+        } else {
+            trackEvent('point_not_found', {
+                point_id: selectedPointId,
+                map_id: Number.parseInt(to.params.mapId, 10),
+                source: to.query.source || 'url',
+            });
         }
 
         next();
@@ -366,6 +393,18 @@ export default {
             this.$router.push({
                 name: 'MapPage',
                 params: { mapId: this.point.mapId }
+            });
+        },
+        trackOutboundClick(linkType) {
+            trackEvent('point_outbound_click', {
+                point_id: this.point.id,
+                map_id: this.point.mapId,
+                link_type: linkType || 'link',
+            });
+            trackEvent('link_click', {
+                point_id: this.point.id,
+                map_id: this.point.mapId,
+                link_type: linkType || 'link',
             });
         },
     },

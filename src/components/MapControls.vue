@@ -27,6 +27,7 @@
 
 <script>
 import {Map as L_Map} from "leaflet";
+import { trackEvent } from "@/analytics";
 
 export default {
     name: "MapControls",
@@ -51,9 +52,11 @@ export default {
     methods: {
         zoomIn() {
             this.mapObject.zoomIn();
+            trackEvent('map_zoom', { direction: 'in' });
         },
         zoomOut() {
             this.mapObject.zoomOut();
+            trackEvent('map_zoom', { direction: 'out' });
         }
     }
 }

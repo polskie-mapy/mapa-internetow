@@ -48,6 +48,7 @@ export default new Vuex.Store({
         visitContextInitialized: false,
         welcomeModalShownInRuntime: false,
         welcomeModalPoints: [],
+        welcomeModalMode: null,
     },
     // set - overwrites value(s)
     // unset - removes value(s)
@@ -121,6 +122,9 @@ export default new Vuex.Store({
         },
         setWelcomeModalPoints(state, points) {
             state.welcomeModalPoints = points;
+        },
+        setWelcomeModalMode(state, mode) {
+            state.welcomeModalMode = mode;
         }
     },
     getters: {
@@ -225,6 +229,9 @@ export default new Vuex.Store({
         welcomeModalPoints(state) {
             return state.welcomeModalPoints;
         },
+        welcomeModalMode(state) {
+            return state.welcomeModalMode;
+        },
         globalMostRecentNewPointAddedAtTs(state) {
             return Math.max(
                 0,
@@ -268,7 +275,9 @@ export default new Vuex.Store({
             }
 
             let targetMaps = ctx.getters.maps;
+            let mode = 'latest_10';
             if (ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
+                mode = 'since_last_visit';
                 targetMaps = ctx.getters.maps.filter((map) => {
                     const recentForMapTs = parseIsoTs(map.mostRecentNewPointAddedAt);
                     return recentForMapTs && recentForMapTs > ctx.getters.visitBaselineAtTs;
@@ -295,6 +304,7 @@ export default new Vuex.Store({
             }
 
             ctx.commit('setWelcomeModalPoints', welcomePoints);
+            ctx.commit('setWelcomeModalMode', mode);
             ctx.commit('markWelcomeModalShownInRuntime');
             window.localStorage.setItem(LS_LAST_SEEN_NEW_POINT_AT, new Date(globalMostRecentTs).toISOString());
 

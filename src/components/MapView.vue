@@ -26,7 +26,7 @@
             <a
               href="#"
               class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 sm:block hidden"
-              @click.prevent="toggleColorScheme"
+              @click.prevent="toggleTheme"
             >
               <fa-icon :icon="colorSchemeIcon" fixed-width />
             </a>
@@ -58,6 +58,7 @@ import MapControls from "@/components/MapControls.vue";
 import MapLookup from "@/components/MapLookup.vue";
 import { findColorInvert } from "@/color-helpers";
 import { LatLng } from "leaflet";
+import { trackEvent } from "@/analytics";
 
 export default {
   name: "MapView",
@@ -132,6 +133,9 @@ export default {
         params: {
           pointId: point.id,
           mapId: point.mapId,
+        },
+        query: {
+          source: "marker",
         },
       });
     },
@@ -227,6 +231,12 @@ export default {
           );
         });
       }
+    },
+    toggleTheme() {
+      this.toggleColorScheme();
+      trackEvent('theme_toggle', {
+        mode: this.colorScheme,
+      });
     },
 
     ...mapMutations(["toggleColorScheme"]),

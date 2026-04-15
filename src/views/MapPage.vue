@@ -15,6 +15,7 @@
 <script>
 import MapView from '@/components/MapView.vue';
 import store from '@/store';
+import { consumePopstateNavigation, trackEvent } from '@/analytics';
 
 export default {
     name: 'MapPage',
@@ -53,6 +54,7 @@ export default {
                 }
             }
 
+            vm.trackMapOpen(to);
             vm.maybeOpenWelcomeModal();
         });
     },
@@ -83,7 +85,8 @@ export default {
             this.$store.commit('unsetFocusedPoint');
         }
 
-        if (to.name === 'MapPage') {
+        if (to.name === 'MapPage' && to.params.mapId !== from.params.mapId) {
+            this.trackMapOpen(to);
             this.$nextTick(() => {
                 this.maybeOpenWelcomeModal();
             });
@@ -105,6 +108,26 @@ export default {
                 params: {
                     mapId: this.$store.getters.currentMap.id,
                 },
+            });
+        },
+        trackMapOpen(route) {
+            const mapId = Number.parseInt(route.params.mapId, 10);
+            if (Number.isNaN(mapId)) {
+                return;
+            }
+
+            const navSource = route.query.navSource;
+
+            let source = 'direct';
+            if (consumePopstateNavigation()) {
+                source = 'back_forward';
+            } else if (navSource === 'switcher') {
+                source = 'switcher';
+            }
+
+            trackEvent('map_open', {
+                map_id: mapId,
+                source,
             });
         }
     },

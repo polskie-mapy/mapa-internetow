@@ -55,9 +55,10 @@
               <router-link
                   v-if="item.type === 'point'"
                   :key="item.id"
-                  :to="{ name: 'PointDetails', params: { pointId: item.id, mapId: item.mapId }}"
+                  :to="{ name: 'PointDetails', params: { pointId: item.id, mapId: item.mapId }, query: { source: 'search' } }"
                   class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black"
                   :title="item.title"
+                  @click.native="trackSearchResultClick(item)"
               >
                   <fa-icon
                       :icon="item.icon | iconCodeToIconName"
@@ -71,7 +72,7 @@
                   :key="item.id"
                   :title="item.title"
                   class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black cursor-pointer"
-                  @click="moveToLocation(item.coords)"
+                  @click="moveToLocation(item)"
               >
                   <fa-icon
                       :icon="['fas', 'fa-map-marker-alt']"
@@ -149,6 +150,7 @@ import {debounce} from "lodash";
 import {mapGetters, mapState} from "vuex";
 import {LControl} from "vue2-leaflet";
 import MapConfig from "@/components/MapConfig.vue";
+import { trackEvent } from "@/analytics";
 
 export default {
     name: "MapLookup",
@@ -159,6 +161,7 @@ export default {
     data: () => ({
         menuVisible: true,
         searchDebouncer: Function,
+        lastTrackedQuery: '',
     }),
     computed: {
         toggleIcon() {
@@ -174,6 +177,7 @@ export default {
         ...mapGetters({
             maps: 'maps',
             pinGroups: 'pinGroups',
+            currentMap: 'currentMap',
         }),
         ...mapGetters('search', {
             hasSearchResults: 'hasSearchResults',
@@ -199,9 +203,19 @@ export default {
     methods: {
         toggleRecentlyAddedFilter(ev) {
             this.$store.commit('setShowRecentlyAddedOnly', ev.target.checked);
+            trackEvent('filter_toggle', {
+                filter: 'recent',
+                enabled: !!ev.target.checked,
+                map_id: this.currentMap?.id,
+            });
         },
         toggleHardestFilter(ev) {
             this.$store.commit('setShowHardestOnly', ev.target.checked);
+            trackEvent('filter_toggle', {
+                filter: 'hardest',
+                enabled: !!ev.target.checked,
+                map_id: this.currentMap?.id,
+            });
         },
         setSearchQuery(ev) {
             this.$store.commit('search/setQuery', ev.target.value);
@@ -212,9 +226,30 @@ export default {
                 this.searchDebouncer();
             }
         },
-        moveToLocation([lat, lng]) {
-            this.$store.commit('setFocusedLocation', [lat, lng]);
+        moveToLocation(item) {
+            this.$store.commit('setFocusedLocation', [item.coords[0], item.coords[1]]);
+            trackEvent('search_result_click', {
+                result_type: item.type,
+                source: 'search_list',
+            });
+        },
+        trackSearchResultClick(item) {
+            trackEvent('search_result_click', {
+                result_type: item.type,
+                source: 'search_list',
+            });
         }
+    },
+    watch: {
+        performingSearch(newValue, oldValue) {
+            if (oldValue === true && newValue === false && this.searchQuery.length > 1 && this.searchQuery !== this.lastTrackedQuery) {
+                trackEvent('search_use', {
+                    query_len: this.searchQuery.length,
+                    results_count: this.searchResults.length,
+                });
+                this.lastTrackedQuery = this.searchQuery;
+            }
+        },
     }
 }
 </script>
