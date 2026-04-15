@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-rows-2 grid-cols-1 shadow">
     <button
-      class="p-2 rounded-b-none hover:outline outline-2 outline-offset-1 text-white rounded flex flex-cols justify-center dark:text-gray-800"
+      class="h-11 w-11 p-0 rounded-b-none hover:outline outline-2 outline-offset-1 text-white rounded flex flex-cols justify-center items-center dark:text-gray-800 active:scale-[0.98] touch-manipulation"
       :class="zoomInClass"
       @click="zoomIn"
     >
@@ -12,7 +12,7 @@
       />
     </button>
     <button
-      class="p-2 rounded-t-none outline-2 outline-offset-1 text-white rounded flex flex-cols justify-center dark:text-gray-800"
+      class="h-11 w-11 p-0 rounded-t-none outline-2 outline-offset-1 text-white rounded flex flex-cols justify-center items-center dark:text-gray-800 active:scale-[0.98] touch-manipulation"
       :class="zoomOutClass"
       @click="zoomOut"
     >

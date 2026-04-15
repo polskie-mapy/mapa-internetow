@@ -35,14 +35,14 @@
               </div>
             </div>
             <div
-              class="flex-0 p-1 leading-none flex gap-x-3"
+              class="flex-0 p-1 leading-none flex gap-x-1.5 text-base"
             >
               <div class="tooltipped">
                 <div class="tooltip">
                   Pokaż na mapie
                 </div>
                 <router-link
-                  class="dark:text-white dark:hover:text-app hover:text-app"
+                  class="h-8 w-8 inline-flex items-center justify-center rounded dark:text-white dark:hover:text-app hover:text-app"
                   :to="{ name:'MapPage', query: {focusPoint: point.id}, params: {mapId: map.id} }"
                 >
                   <fa-icon
@@ -55,7 +55,7 @@
                   Zaproponuj poprawkę
                 </div>
                 <a
-                  class="dark:text-white dark:hover:text-app hover:text-app cursor-pointer"
+                  class="h-8 w-8 inline-flex items-center justify-center rounded dark:text-white dark:hover:text-app hover:text-app cursor-pointer"
                   :href="proposeUrl"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -66,7 +66,7 @@
                 </a>
               </div>
               <a
-                class="dark:text-white dark:hover:text-app hover:text-app cursor-pointer"
+                class="h-8 w-8 inline-flex items-center justify-center rounded dark:text-white dark:hover:text-app hover:text-app cursor-pointer"
                 @click.prevent="hideDetails"
               >
                 <fa-icon
@@ -75,10 +75,10 @@
               </a>
             </div>
           </div>
-        <div class="col-span-2 text-sm -mt-3 text-black dark:text-white">
+        <div class="col-span-2 text-sm -mt-2 text-black dark:text-white">
             {{ map.name }}
         </div>
-          <div class="col-span-2 text-gray-400 text-xs gap-y-1 gap-x-3 md:flex hidden">
+          <div class="col-span-2 text-gray-500 dark:text-gray-300 text-xs gap-y-1 gap-x-3 md:flex hidden">
             <div>
               tagi:
               <div v-if="point.tags.length" class="inline-flex gap-x-0.5">
@@ -155,7 +155,7 @@
               </div>
             </div>
           </div>
-          <div class="grid grid-rows-1 auto-rows-min gap-y-1 relative md:col-span-1 col-span-2 mb-2 md:mb-0">
+          <div class="grid grid-rows-1 auto-rows-min gap-y-2 relative md:col-span-1 col-span-2 mb-2 md:mb-0">
             <p class="break-all max-h-40 overflow-y-auto dark:text-gray-200">
               {{ point.excerpt }}
             </p>

@@ -19,20 +19,20 @@
             <router-link
               v-if="false"
               :to="{ name: 'Funding' }"
-              class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 sm:block hidden"
+              class="hidden sm:inline-flex h-11 w-11 p-0 bg-white border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 items-center justify-center"
             >
               <fa-icon icon="fa-solid fa-beer" fixed-width />
             </router-link>
             <a
               href="#"
-              class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 sm:block hidden"
+              class="hidden sm:inline-flex h-11 w-11 p-0 bg-white border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 items-center justify-center"
               @click.prevent="toggleTheme"
             >
               <fa-icon :icon="colorSchemeIcon" fixed-width />
             </a>
             <router-link
               :to="{ name: 'About' }"
-              class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
+              class="h-11 w-11 p-0 bg-white border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 inline-flex items-center justify-center"
             >
               <fa-icon icon="fa-solid fa-circle-exclamation" fixed-width />
             </router-link>

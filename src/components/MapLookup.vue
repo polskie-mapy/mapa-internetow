@@ -6,7 +6,7 @@
     >
       <div class="flex gap-1">
         <button
-          class="p-2 bg-app hover:outline outline-2 outline-offset-1 outline-app text-white rounded shadow flex flex-cols justify-center dark:text-gray-800"
+          class="h-11 w-11 p-0 bg-app hover:outline outline-2 outline-offset-1 outline-app text-white rounded shadow flex flex-cols justify-center items-center dark:text-gray-800 active:scale-[0.98] touch-manipulation"
           @click="menuVisible = !menuVisible"
         >
           <fa-icon
@@ -98,7 +98,7 @@
           Filtry
         </div>
         <ul class="my-2 ml-1 flex flex-col gap-y-2">
-          <li class="flex items-center justify-between gap-2">
+          <li class="flex items-center justify-between gap-3 py-1.5">
             <label for="ml-filter-recent" class="dark:text-white select-none cursor-pointer">
               Ostatnio dodane
             </label>
@@ -110,7 +110,7 @@
               @input="toggleRecentlyAddedFilter"
             >
           </li>
-          <li class="flex items-center justify-between gap-2">
+          <li class="flex items-center justify-between gap-3 py-1.5">
             <label for="ml-filter-hardest" class="dark:text-white select-none cursor-pointer">
               Najtrudniejsze (4-5★)
             </label>
