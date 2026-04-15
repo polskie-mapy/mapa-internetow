@@ -7,6 +7,31 @@ import { APP_BUILT_DATE, APP_VERSION } from '@/app-helpers';
 
 Vue.use(Vuex);
 
+const LS_LAST_VISIT_AT = 'mi:last-visit-at';
+const LS_LAST_SEEN_NEW_POINT_AT = 'mi:last-seen-new-point-added-at';
+const DAY_MS = 24 * 60 * 60 * 1000;
+const RECENT_LIMIT = 10;
+
+function parseIsoTs(value) {
+    if (!value || typeof value !== 'string') {
+        return null;
+    }
+
+    const ts = Date.parse(value);
+
+    return Number.isNaN(ts) ? null : ts;
+}
+
+function clampDifficulty(value) {
+    const parsed = Number.parseInt(value, 10);
+
+    if (Number.isNaN(parsed)) {
+        return 0;
+    }
+
+    return Math.min(5, Math.max(0, parsed));
+}
+
 export default new Vuex.Store({
     state: {
         colorScheme: 'system',
@@ -16,6 +41,13 @@ export default new Vuex.Store({
         currentPoint: null,
         focusedPoint: null,
         focusedLocation: null,
+        showRecentlyAddedOnly: false,
+        showHardestOnly: false,
+        visitBaselineAtTs: null,
+        visitWithin30Days: false,
+        visitContextInitialized: false,
+        welcomeModalShownInRuntime: false,
+        welcomeModalPoints: [],
     },
     // set - overwrites value(s)
     // unset - removes value(s)
@@ -70,6 +102,25 @@ export default new Vuex.Store({
         },
         setFocusedLocation(state, location) {
             state.focusedLocation = location;
+        },
+        setShowRecentlyAddedOnly(state, enabled) {
+            state.showRecentlyAddedOnly = !!enabled;
+        },
+        setShowHardestOnly(state, enabled) {
+            state.showHardestOnly = !!enabled;
+        },
+        setVisitContext(state, { baselineAtTs, within30Days }) {
+            state.visitBaselineAtTs = baselineAtTs;
+            state.visitWithin30Days = within30Days;
+        },
+        markVisitContextInitialized(state) {
+            state.visitContextInitialized = true;
+        },
+        markWelcomeModalShownInRuntime(state) {
+            state.welcomeModalShownInRuntime = true;
+        },
+        setWelcomeModalPoints(state, points) {
+            state.welcomeModalPoints = points;
         }
     },
     getters: {
@@ -98,7 +149,37 @@ export default new Vuex.Store({
             return Array.from(state.points.values());
         },
         currentPoints(_state, getters) {
-            return getters.points.filter(x => getters.currentMapsIds.includes(x.mapId));
+            const basePoints = getters.points.filter(x => getters.currentMapsIds.includes(x.mapId));
+
+            if (!getters.showRecentlyAddedOnly && !getters.showHardestOnly) {
+                return basePoints;
+            }
+
+            const currentMapId = getters.currentMap?.id;
+            const pointsFromCurrentMap = basePoints.filter(point => point.mapId === currentMapId);
+            const pointsFromOtherMaps = basePoints.filter(point => point.mapId !== currentMapId);
+
+            let filteredCurrentMapPoints = pointsFromCurrentMap;
+
+            if (getters.showRecentlyAddedOnly) {
+                if (getters.visitWithin30Days && getters.visitBaselineAtTs) {
+                    filteredCurrentMapPoints = filteredCurrentMapPoints.filter((point) => {
+                        const createdAtTs = parseIsoTs(point.createdAt);
+                        return createdAtTs && createdAtTs > getters.visitBaselineAtTs;
+                    });
+                } else {
+                    filteredCurrentMapPoints = filteredCurrentMapPoints
+                        .slice()
+                        .sort((a, b) => (parseIsoTs(b.createdAt) || 0) - (parseIsoTs(a.createdAt) || 0))
+                        .slice(0, RECENT_LIMIT);
+                }
+            }
+
+            if (getters.showHardestOnly) {
+                filteredCurrentMapPoints = filteredCurrentMapPoints.filter((point) => clampDifficulty(point.difficulty) >= 4);
+            }
+
+            return [...filteredCurrentMapPoints, ...pointsFromOtherMaps];
         },
         maps(state) {
             return Array.from(state.maps.values());
@@ -128,9 +209,97 @@ export default new Vuex.Store({
             }
 
             return 'fa-solid fa-desktop';
+        },
+        showRecentlyAddedOnly(state) {
+            return state.showRecentlyAddedOnly;
+        },
+        showHardestOnly(state) {
+            return state.showHardestOnly;
+        },
+        visitBaselineAtTs(state) {
+            return state.visitBaselineAtTs;
+        },
+        visitWithin30Days(state) {
+            return state.visitWithin30Days;
+        },
+        welcomeModalPoints(state) {
+            return state.welcomeModalPoints;
+        },
+        globalMostRecentNewPointAddedAtTs(state) {
+            return Math.max(
+                0,
+                ...Array
+                    .from(state.maps.values())
+                    .map((map) => parseIsoTs(map.mostRecentNewPointAddedAt) || 0)
+            ) || null;
         }
     },
     actions: {
+        initializeVisitContext(ctx) {
+            if (ctx.state.visitContextInitialized) {
+                return;
+            }
+
+            const nowTs = Date.now();
+            const storedLastVisitAtTs = parseIsoTs(window.localStorage.getItem(LS_LAST_VISIT_AT));
+            const within30Days = !!storedLastVisitAtTs && (nowTs - storedLastVisitAtTs) <= 30 * DAY_MS;
+
+            ctx.commit('setVisitContext', {
+                baselineAtTs: storedLastVisitAtTs,
+                within30Days,
+            });
+            ctx.commit('markVisitContextInitialized');
+
+            window.localStorage.setItem(LS_LAST_VISIT_AT, new Date(nowTs).toISOString());
+        },
+        async maybePrepareWelcomeModal(ctx) {
+            if (ctx.state.welcomeModalShownInRuntime) {
+                return false;
+            }
+
+            const globalMostRecentTs = ctx.getters.globalMostRecentNewPointAddedAtTs;
+            if (!globalMostRecentTs) {
+                return false;
+            }
+
+            const lastSeenGlobalTs = parseIsoTs(window.localStorage.getItem(LS_LAST_SEEN_NEW_POINT_AT));
+            if (lastSeenGlobalTs && globalMostRecentTs <= lastSeenGlobalTs) {
+                return false;
+            }
+
+            let targetMaps = ctx.getters.maps;
+            if (ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
+                targetMaps = ctx.getters.maps.filter((map) => {
+                    const recentForMapTs = parseIsoTs(map.mostRecentNewPointAddedAt);
+                    return recentForMapTs && recentForMapTs > ctx.getters.visitBaselineAtTs;
+                });
+            }
+
+            await Promise.all(targetMaps.map((map) => ctx.dispatch('fetchPoints', map.id)));
+
+            let points = ctx.getters.points.slice();
+            if (ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
+                points = points.filter((point) => {
+                    const createdAtTs = parseIsoTs(point.createdAt);
+                    return createdAtTs && createdAtTs > ctx.getters.visitBaselineAtTs;
+                });
+            }
+
+            const welcomePoints = points
+                .slice()
+                .sort((a, b) => (parseIsoTs(b.createdAt) || 0) - (parseIsoTs(a.createdAt) || 0))
+                .slice(0, RECENT_LIMIT);
+
+            if (welcomePoints.length === 0) {
+                return false;
+            }
+
+            ctx.commit('setWelcomeModalPoints', welcomePoints);
+            ctx.commit('markWelcomeModalShownInRuntime');
+            window.localStorage.setItem(LS_LAST_SEEN_NEW_POINT_AT, new Date(globalMostRecentTs).toISOString());
+
+            return true;
+        },
         async fetchPoints(ctx, mapId) {
             if (ctx.getters.points.find(x => x.mapId === mapId)) {
                 // already fetched, no need to do that

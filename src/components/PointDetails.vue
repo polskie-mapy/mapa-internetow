@@ -97,6 +97,29 @@
                 brak
               </span>
             </div>
+            <div v-if="difficultyValue > 0" class="inline-flex items-center gap-x-1">
+              <span>trudność:</span>
+              <span
+                v-for="starIdx in 5"
+                :key="`difficulty-desktop-${starIdx}`"
+                :class="starIdx <= difficultyValue ? 'text-app' : 'text-gray-300 dark:text-gray-500'"
+              >
+                <fa-icon icon="fa-solid fa-star" />
+              </span>
+            </div>
+          </div>
+          <div
+            v-if="difficultyValue > 0"
+            class="col-span-2 text-xs text-gray-400 inline-flex md:hidden items-center gap-x-1 -mt-2"
+          >
+            <span>trudność:</span>
+            <span
+              v-for="starIdx in 5"
+              :key="`difficulty-mobile-${starIdx}`"
+              :class="starIdx <= difficultyValue ? 'text-app' : 'text-gray-300 dark:text-gray-500'"
+            >
+              <fa-icon icon="fa-solid fa-star" />
+            </span>
           </div>
           <a
             v-if="ytLink"
@@ -149,6 +172,7 @@
               pomógł -
               <a 
                 v-for="submitter in submitters"
+                :key="`${submitter.type}-${submitter.user}`"
                 :href="submitter.url"
                 class="hover:text-app font-bold dark:hover:text-app"
                 target="_blank"
@@ -245,6 +269,15 @@ export default {
         next();
     },
     computed: {
+        difficultyValue() {
+            const parsed = Number.parseInt(this.point.difficulty, 10);
+
+            if (Number.isNaN(parsed)) {
+                return 0;
+            }
+
+            return Math.min(5, Math.max(0, parsed));
+        },
         mapLink() {
             return this.$H.coords2GmapsPin(this.point.coords);
         },

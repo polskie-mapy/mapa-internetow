@@ -23,6 +23,7 @@ export default {
     },
     async beforeRouteEnter(to, _from, next) {
         await store.dispatch('fetchMaps');
+        store.dispatch('initializeVisitContext');
 
         if (!store.getters.anyMapSelected && typeof to.params.mapId === 'undefined') {
             store.commit('setCurrentMap', store.getters.defaultMap.id);
@@ -51,6 +52,8 @@ export default {
                     vm.$store.commit('setFocusedPoint', point);
                 }
             }
+
+            vm.maybeOpenWelcomeModal();
         });
     },
     async beforeRouteUpdate(to, from, next) {
@@ -79,6 +82,34 @@ export default {
         } else {
             this.$store.commit('unsetFocusedPoint');
         }
+
+        if (to.name === 'MapPage') {
+            this.$nextTick(() => {
+                this.maybeOpenWelcomeModal();
+            });
+        }
+    },
+    methods: {
+        async maybeOpenWelcomeModal() {
+            if (this.$route.name !== 'MapPage') {
+                return;
+            }
+
+            const shouldOpen = await this.$store.dispatch('maybePrepareWelcomeModal');
+            if (!shouldOpen) {
+                return;
+            }
+
+            this.$router.push({
+                name: 'MapWelcome',
+                params: {
+                    mapId: this.$store.getters.currentMap.id,
+                },
+            });
+        }
+    },
+    mounted() {
+        this.maybeOpenWelcomeModal();
     }
 };
 </script>

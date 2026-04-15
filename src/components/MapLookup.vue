@@ -94,6 +94,41 @@
         class="py-2 px-4 bg-white border-app border-2 rounded shadow mb-4 dark:bg-gray-700"
       >
         <div class="text-lg leading-loose divide-y dark:text-white">
+          Filtry
+        </div>
+        <ul class="my-2 ml-1 flex flex-col gap-y-2">
+          <li class="flex items-center justify-between gap-2">
+            <label for="ml-filter-recent" class="dark:text-white select-none cursor-pointer">
+              Ostatnio dodane
+            </label>
+            <input
+              id="ml-filter-recent"
+              :checked="showRecentlyAddedOnly"
+              type="checkbox"
+              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app focus:outline-none cursor-pointer"
+              @input="toggleRecentlyAddedFilter"
+            >
+          </li>
+          <li class="flex items-center justify-between gap-2">
+            <label for="ml-filter-hardest" class="dark:text-white select-none cursor-pointer">
+              Najtrudniejsze (4-5★)
+            </label>
+            <input
+              id="ml-filter-hardest"
+              :checked="showHardestOnly"
+              type="checkbox"
+              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app focus:outline-none cursor-pointer"
+              @input="toggleHardestFilter"
+            >
+          </li>
+        </ul>
+      </div>
+
+      <div
+        v-if="menuVisible"
+        class="py-2 px-4 bg-white border-app border-2 rounded shadow mb-4 dark:bg-gray-700"
+      >
+        <div class="text-lg leading-loose divide-y dark:text-white">
           Wyświetlane mapy
         </div>
         <ul class="my-2 ml-4 flex flex-col gap-y-2">
@@ -133,6 +168,8 @@ export default {
         },
         ...mapState({
             currentMaps: 'currentMaps',
+            showRecentlyAddedOnly: 'showRecentlyAddedOnly',
+            showHardestOnly: 'showHardestOnly',
         }),
         ...mapGetters({
             maps: 'maps',
@@ -160,6 +197,12 @@ export default {
         }, 500);
     },
     methods: {
+        toggleRecentlyAddedFilter(ev) {
+            this.$store.commit('setShowRecentlyAddedOnly', ev.target.checked);
+        },
+        toggleHardestFilter(ev) {
+            this.$store.commit('setShowHardestOnly', ev.target.checked);
+        },
         setSearchQuery(ev) {
             this.$store.commit('search/setQuery', ev.target.value);
 

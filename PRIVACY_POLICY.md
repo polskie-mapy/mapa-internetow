@@ -49,7 +49,7 @@ Polityka prywatności opisuje zasady przetwarzania przez nas informacji na Twój
 
 7. Istotne techniki marketingowe
 
-    Operator stosuje analizę statystyczną ruchu na stronie, poprzez Cloudflare Web Analytics (Cloudflare Inc. z siedzibą w USA). Operator nie przekazuje do operatora tej usługi danych osobowych, a jedynie zanonimizowane informacje. Usługa bazuje na wykorzystaniu ciasteczek w urządzeniu końcowym użytkownika.
+    Operator stosuje analizę statystyczną ruchu na stronie, poprzez Cloudflare Web Analytics (Cloudflare Inc. z siedzibą w USA) oraz Umami (Umami z siedzibą w USA, rezydencja EU). Operator nie przekazuje do operatora tej usługi danych osobowych, a jedynie zanonimizowane informacje. Usługa Cloudflare bazuje na wykorzystaniu ciasteczek w urządzeniu końcowym użytkownika. Usługa Umami wykorzystuje skrypty po stronie klienta.
 
 8. Informacja o plikach cookies
 

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import MapPage from '../views/MapPage.vue'
 import PointDetails from "@/components/PointDetails.vue";
+import WelcomeModal from "@/views/WelcomeModal.vue";
 
 Vue.use(VueRouter)
 
@@ -22,6 +23,11 @@ const routes = [
         name: 'MapPage',
         component: MapPage,
         children: [
+            {
+                path: 'welcome',
+                name: 'MapWelcome',
+                component: WelcomeModal,
+            },
             {
                 path: 'point/:pointId',
                 component: PointDetails,
