@@ -346,24 +346,24 @@ export default new Vuex.Store({
             ctx.commit('markPointSeen', parsedPointId);
             window.localStorage.setItem(LS_SEEN_POINT_IDS, JSON.stringify(ctx.state.seenPointIds));
         },
-        async maybePrepareWelcomeModal(ctx) {
-            if (ctx.state.welcomeModalShownInRuntime) {
+        async prepareWelcomeModal(ctx, { force = false } = {}) {
+            if (!force && ctx.state.welcomeModalShownInRuntime) {
                 return false;
             }
 
             const globalMostRecentTs = ctx.getters.globalMostRecentNewPointAddedAtTs;
-            if (!globalMostRecentTs) {
+            if (!force && !globalMostRecentTs) {
                 return false;
             }
 
             const lastSeenGlobalTs = parseIsoTs(window.localStorage.getItem(LS_LAST_SEEN_NEW_POINT_AT));
-            if (lastSeenGlobalTs && globalMostRecentTs <= lastSeenGlobalTs) {
+            if (!force && lastSeenGlobalTs && globalMostRecentTs <= lastSeenGlobalTs) {
                 return false;
             }
 
             let targetMaps = ctx.getters.maps;
             let mode = 'latest_10';
-            if (ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
+            if (!force && ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
                 mode = 'since_last_visit';
                 targetMaps = ctx.getters.maps.filter((map) => {
                     const recentForMapTs = parseIsoTs(map.mostRecentNewPointAddedAt);
@@ -374,7 +374,7 @@ export default new Vuex.Store({
             await Promise.all(targetMaps.map((map) => ctx.dispatch('fetchPoints', map.id)));
 
             let points = ctx.getters.points.slice();
-            if (ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
+            if (!force && ctx.getters.visitWithin30Days && ctx.getters.visitBaselineAtTs) {
                 points = points.filter((point) => {
                     const createdAtTs = parseIsoTs(point.createdAt);
                     return createdAtTs && createdAtTs > ctx.getters.visitBaselineAtTs;
@@ -392,10 +392,18 @@ export default new Vuex.Store({
 
             ctx.commit('setWelcomeModalPoints', welcomePoints);
             ctx.commit('setWelcomeModalMode', mode);
-            ctx.commit('markWelcomeModalShownInRuntime');
-            window.localStorage.setItem(LS_LAST_SEEN_NEW_POINT_AT, new Date(globalMostRecentTs).toISOString());
+            if (!force) {
+                ctx.commit('markWelcomeModalShownInRuntime');
+                window.localStorage.setItem(LS_LAST_SEEN_NEW_POINT_AT, new Date(globalMostRecentTs).toISOString());
+            }
 
             return true;
+        },
+        async maybePrepareWelcomeModal(ctx) {
+            return ctx.dispatch('prepareWelcomeModal', { force: false });
+        },
+        async prepareWelcomeModalManual(ctx) {
+            return ctx.dispatch('prepareWelcomeModal', { force: true });
         },
         async fetchPoints(ctx, mapId) {
             if (ctx.getters.points.find(x => x.mapId === mapId)) {

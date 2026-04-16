@@ -25,6 +25,13 @@
             </router-link>
             <a
               href="#"
+              class="h-11 w-11 p-0 bg-white border-app border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 inline-flex items-center justify-center"
+              @click.prevent="openWelcomeModalManual"
+            >
+              <fa-icon icon="fa-solid fa-star" fixed-width />
+            </a>
+            <a
+              href="#"
               class="hidden sm:inline-flex h-11 w-11 p-0 bg-white border-app border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 items-center justify-center"
               @click.prevent="toggleTheme"
             >
@@ -231,6 +238,23 @@ export default {
           );
         });
       }
+    },
+    async openWelcomeModalManual() {
+      const shouldOpen = await this.$store.dispatch("prepareWelcomeModalManual");
+      if (!shouldOpen) {
+        return;
+      }
+
+      await this.$router.push({
+        name: "MapWelcome",
+        params: {
+          mapId: this.$store.getters.currentMap.id,
+        },
+      }).catch((err) => {
+        if (err && err.name !== "NavigationDuplicated") {
+          throw err;
+        }
+      });
     },
     toggleTheme() {
       this.toggleColorScheme();
