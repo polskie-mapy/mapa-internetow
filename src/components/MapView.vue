@@ -7,7 +7,7 @@
         :zoom="mapZoom"
         :min-zoom="minZoom"
         :center="mapCenter"
-        :options="{ preferCanvas: true, zoomControl: false }"
+        :options="{ preferCanvas: true, zoomControl: false, worldCopyJump: true }"
         @ready="mapMounted"
       >
         <l-tile-layer :url="tileLayerUrl" :attribution="mapAttribution" />
