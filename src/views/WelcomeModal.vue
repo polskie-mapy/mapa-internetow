@@ -34,7 +34,8 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   class="h-20 w-28 sm:h-24 sm:w-36 rounded overflow-hidden shrink-0"
-                  @click="trackOutboundLink(point, 'yt')"
+                  @click.prevent="openYtFromThumbnail(point)"
+                  @touchend.prevent="openYtFromThumbnail(point)"
                 >
                   <VideoThumbnail
                     :target-url="ytLink(point)"
@@ -149,6 +150,15 @@ export default {
                     source: 'welcome',
                 }
             });
+        },
+        openYtFromThumbnail(point) {
+            const link = this.ytLink(point);
+            if (!link) {
+                return;
+            }
+
+            this.trackOutboundLink(point, 'yt');
+            window.open(link, '_blank', 'noopener,noreferrer');
         },
         trackOutboundLink(point, linkType) {
             trackEvent('point_outbound_click', {

@@ -10,7 +10,7 @@
                 ref="thumbnailObject"
                 type="image/jpg"
                 :data="thumbnailUrl"
-                :class="objectClass"
+                :class="[objectClass, 'pointer-events-none']"
             >
                 <div class="h-full w-full grid place-items-center text-white bg-gray-300">
                     <fa-icon
@@ -21,7 +21,7 @@
                 </div>
             </object>
             <div
-                class="text-app bg-black/25 inset-0 absolute grid place-content-center"
+                class="text-app bg-black/25 inset-0 absolute grid place-content-center pointer-events-none"
             >
                 <fa-icon
                     icon="fa-regular fa-circle-play"
