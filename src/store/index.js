@@ -231,7 +231,7 @@ export default new Vuex.Store({
                             0,
                             ...pointsFromCurrentMap.map((point) => parseIsoTs(point.createdAt) || 0)
                         );
-                        const fallbackThresholdTs = mostRecentPointTs - (30 * DAY_MS);
+                        const fallbackThresholdTs = mostRecentPointTs - (90 * DAY_MS);
 
                         filteredCurrentMapPoints = pointsFromCurrentMap.filter((point) => {
                             const createdAtTs = parseIsoTs(point.createdAt);
