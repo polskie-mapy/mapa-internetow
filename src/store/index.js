@@ -9,6 +9,7 @@ Vue.use(Vuex);
 
 const LS_LAST_VISIT_AT = 'mi:last-visit-at';
 const LS_LAST_SEEN_NEW_POINT_AT = 'mi:last-seen-new-point-added-at';
+const LS_SEEN_POINT_IDS = 'mi:seen-point-ids';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const RECENT_LIMIT = 10;
 
@@ -32,6 +33,25 @@ function clampDifficulty(value) {
     return Math.min(5, Math.max(0, parsed));
 }
 
+function parseSeenPointIds(rawValue) {
+    if (!rawValue) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(rawValue);
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+
+        return parsed
+            .map((x) => Number.parseInt(x, 10))
+            .filter((x) => !Number.isNaN(x));
+    } catch {
+        return [];
+    }
+}
+
 export default new Vuex.Store({
     state: {
         colorScheme: 'system',
@@ -43,6 +63,8 @@ export default new Vuex.Store({
         focusedLocation: null,
         showRecentlyAddedOnly: false,
         showHardestOnly: false,
+        showUnseenOnly: false,
+        seenPointIds: [],
         visitBaselineAtTs: null,
         visitWithin30Days: false,
         visitContextInitialized: false,
@@ -110,6 +132,19 @@ export default new Vuex.Store({
         setShowHardestOnly(state, enabled) {
             state.showHardestOnly = !!enabled;
         },
+        setShowUnseenOnly(state, enabled) {
+            state.showUnseenOnly = !!enabled;
+        },
+        setSeenPointIds(state, ids) {
+            state.seenPointIds = Array.isArray(ids) ? Array.from(new Set(ids)) : [];
+        },
+        markPointSeen(state, pointId) {
+            if (state.seenPointIds.includes(pointId)) {
+                return;
+            }
+
+            state.seenPointIds = [...state.seenPointIds, pointId];
+        },
         setVisitContext(state, { baselineAtTs, within30Days }) {
             state.visitBaselineAtTs = baselineAtTs;
             state.visitWithin30Days = within30Days;
@@ -152,11 +187,30 @@ export default new Vuex.Store({
         points(state) {
             return Array.from(state.points.values());
         },
-        currentPoints(_state, getters) {
+        currentPoints(state, getters) {
             const basePoints = getters.points.filter(x => getters.currentMapsIds.includes(x.mapId));
 
-            if (!getters.showRecentlyAddedOnly && !getters.showHardestOnly) {
-                return basePoints;
+            const focusedPoint = state.focusedPoint;
+            const ensureFocusedPointIncluded = (points) => {
+                if (!focusedPoint) {
+                    return points;
+                }
+
+                const isFocusedPointEligible = basePoints.some((point) => point.id === focusedPoint.id);
+                if (!isFocusedPointEligible) {
+                    return points;
+                }
+
+                const alreadyPresent = points.some((point) => point.id === focusedPoint.id);
+                if (alreadyPresent) {
+                    return points;
+                }
+
+                return [focusedPoint, ...points];
+            };
+
+            if (!getters.showRecentlyAddedOnly && !getters.showHardestOnly && !getters.showUnseenOnly) {
+                return ensureFocusedPointIncluded(basePoints);
             }
 
             const currentMapId = getters.currentMap?.id;
@@ -171,6 +225,19 @@ export default new Vuex.Store({
                         const createdAtTs = parseIsoTs(point.createdAt);
                         return createdAtTs && createdAtTs > getters.visitBaselineAtTs;
                     });
+
+                    if (filteredCurrentMapPoints.length === 0) {
+                        const mostRecentPointTs = Math.max(
+                            0,
+                            ...pointsFromCurrentMap.map((point) => parseIsoTs(point.createdAt) || 0)
+                        );
+                        const fallbackThresholdTs = mostRecentPointTs - (30 * DAY_MS);
+
+                        filteredCurrentMapPoints = pointsFromCurrentMap.filter((point) => {
+                            const createdAtTs = parseIsoTs(point.createdAt);
+                            return createdAtTs && createdAtTs >= fallbackThresholdTs;
+                        });
+                    }
                 } else {
                     filteredCurrentMapPoints = filteredCurrentMapPoints
                         .slice()
@@ -183,7 +250,11 @@ export default new Vuex.Store({
                 filteredCurrentMapPoints = filteredCurrentMapPoints.filter((point) => clampDifficulty(point.difficulty) >= 4);
             }
 
-            return [...filteredCurrentMapPoints, ...pointsFromOtherMaps];
+            if (getters.showUnseenOnly) {
+                filteredCurrentMapPoints = filteredCurrentMapPoints.filter((point) => !getters.seenPointIdsSet.has(point.id));
+            }
+
+            return ensureFocusedPointIncluded([...filteredCurrentMapPoints, ...pointsFromOtherMaps]);
         },
         maps(state) {
             return Array.from(state.maps.values());
@@ -220,6 +291,12 @@ export default new Vuex.Store({
         showHardestOnly(state) {
             return state.showHardestOnly;
         },
+        showUnseenOnly(state) {
+            return state.showUnseenOnly;
+        },
+        seenPointIdsSet(state) {
+            return new Set(state.seenPointIds);
+        },
         visitBaselineAtTs(state) {
             return state.visitBaselineAtTs;
         },
@@ -255,9 +332,19 @@ export default new Vuex.Store({
                 baselineAtTs: storedLastVisitAtTs,
                 within30Days,
             });
+            ctx.commit('setSeenPointIds', parseSeenPointIds(window.localStorage.getItem(LS_SEEN_POINT_IDS)));
             ctx.commit('markVisitContextInitialized');
 
             window.localStorage.setItem(LS_LAST_VISIT_AT, new Date(nowTs).toISOString());
+        },
+        markPointAsSeen(ctx, pointId) {
+            const parsedPointId = Number.parseInt(pointId, 10);
+            if (Number.isNaN(parsedPointId)) {
+                return;
+            }
+
+            ctx.commit('markPointSeen', parsedPointId);
+            window.localStorage.setItem(LS_SEEN_POINT_IDS, JSON.stringify(ctx.state.seenPointIds));
         },
         async maybePrepareWelcomeModal(ctx) {
             if (ctx.state.welcomeModalShownInRuntime) {

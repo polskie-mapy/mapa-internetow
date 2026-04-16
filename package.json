@@ -1,6 +1,6 @@
 {
   "name": "polskie-mapy",
-  "version": "0.2.1",
+  "version": "2.13.7",
   "private": true,
   "scripts": {
     "dev": "vite --port 8080 --host",

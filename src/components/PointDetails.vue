@@ -258,6 +258,7 @@ export default {
 
         if (store.getters.point(selectedPointId)) {
             store.commit('setCurrentPoint', store.getters.point(selectedPointId));
+            store.dispatch('markPointAsSeen', selectedPointId);
             const point = store.getters.point(selectedPointId);
             trackEvent('point_open', {
                 point_id: point.id,
@@ -279,6 +280,7 @@ export default {
 
         if (store.getters.point(selectedPointId)) {
             store.commit('setCurrentPoint', store.getters.point(selectedPointId));
+            store.dispatch('markPointAsSeen', selectedPointId);
             const point = store.getters.point(selectedPointId);
             trackEvent('point_open', {
                 point_id: point.id,

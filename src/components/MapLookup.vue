@@ -17,7 +17,7 @@
         </button>
         <div
           v-if="menuVisible"
-          class="border-app border border-2 rounded shadow outline-none ring-app hover:outline hover:outline-app outline-offset-1 outline-2 text-lg w-full flex"
+          class="border-app border-2 rounded shadow outline-none ring-app hover:outline hover:outline-app outline-offset-1 outline-2 text-lg w-full flex"
           :class="{'border-gray-600 hover:outline-gray-600': !searchIndexInitialized, 'hover:outline-app ring-app focus:ring': searchIndexInitialized}"
         >
           <input
@@ -97,30 +97,42 @@
         <div class="text-lg leading-loose divide-y dark:text-white">
           Filtry
         </div>
-        <ul class="my-2 ml-1 flex flex-col gap-y-2">
-          <li class="flex items-center justify-between gap-3 py-1.5">
-            <label for="ml-filter-recent" class="dark:text-white select-none cursor-pointer">
-              Ostatnio dodane
-            </label>
+        <ul class="my-2 ml-4 flex flex-col gap-y-2">
+          <li class="flex items-center">
             <input
               id="ml-filter-recent"
               :checked="showRecentlyAddedOnly"
               type="checkbox"
-              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app focus:outline-none cursor-pointer"
+              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
               @input="toggleRecentlyAddedFilter"
             >
-          </li>
-          <li class="flex items-center justify-between gap-3 py-1.5">
-            <label for="ml-filter-hardest" class="dark:text-white select-none cursor-pointer">
-              Najtrudniejsze (4-5★)
+            <label for="ml-filter-recent" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+              Ostatnio dodane
             </label>
+          </li>
+          <li class="flex items-center">
             <input
               id="ml-filter-hardest"
               :checked="showHardestOnly"
               type="checkbox"
-              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app focus:outline-none cursor-pointer"
+              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
               @input="toggleHardestFilter"
             >
+            <label for="ml-filter-hardest" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+              Najtrudniejsze (4-5★)
+            </label>
+          </li>
+          <li class="flex items-center">
+            <input
+              id="ml-filter-unseen"
+              :checked="showUnseenOnly"
+              type="checkbox"
+              class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
+              @input="toggleUnseenFilter"
+            >
+            <label for="ml-filter-unseen" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+              Nieobejrzane punkty
+            </label>
           </li>
         </ul>
       </div>
@@ -173,6 +185,7 @@ export default {
             currentMaps: 'currentMaps',
             showRecentlyAddedOnly: 'showRecentlyAddedOnly',
             showHardestOnly: 'showHardestOnly',
+            showUnseenOnly: 'showUnseenOnly',
         }),
         ...mapGetters({
             maps: 'maps',
@@ -213,6 +226,14 @@ export default {
             this.$store.commit('setShowHardestOnly', ev.target.checked);
             trackEvent('filter_toggle', {
                 filter: 'hardest',
+                enabled: !!ev.target.checked,
+                map_id: this.currentMap?.id,
+            });
+        },
+        toggleUnseenFilter(ev) {
+            this.$store.commit('setShowUnseenOnly', ev.target.checked);
+            trackEvent('filter_toggle', {
+                filter: 'unseen',
                 enabled: !!ev.target.checked,
                 map_id: this.currentMap?.id,
             });

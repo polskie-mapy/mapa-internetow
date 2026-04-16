@@ -7,7 +7,7 @@
           :checked="isInCurrentMaps"
           :disabled="fetchingData"
           type="checkbox"
-          class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app focus:outline-none align-top mr-2 cursor-pointer"
+          class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
           @input="toggleCurrentMaps"
         >
         <label

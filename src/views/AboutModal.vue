@@ -91,14 +91,14 @@
             <router-link
               v-if="false"
               :to="{ name: 'Funding' }"
-              class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
+              class="bg-white p-2 border-app border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
             >
               <fa-icon icon="fa-solid fa-beer" fixed-width />
               Wsparcie
             </router-link>
             <a
               href="#"
-              class="bg-white p-2 border-app border border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
+              class="bg-white p-2 border-app border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700"
               @click.prevent="toggleColorScheme"
             >
               <fa-icon :icon="colorSchemeIcon" fixed-width />
