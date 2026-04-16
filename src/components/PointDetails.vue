@@ -125,8 +125,7 @@
             v-if="ytLink"
             class="rounded hover:outline-2 hover:outline hover:outline-offset-1 hover:outline-app relative h-36 w-48 md:justify-self-auto justify-self-center col-span-2 md:col-span-1"
             :href="ytLink"
-            target="_blank"
-            @click="trackOutboundClick('yt')"
+            @click.prevent="handleYtClick(ytRawLink)"
           >
             <VideoThumbnail
               :target-url="ytLink"
@@ -199,11 +198,11 @@
                 {{ link.tooltip }}
               </div>
               <a
-                :href="link.url"
+                :href="link.type === 'yt' ? $H.ytLink(link.url) : link.url"
                 class="bg-point-details-link-var px-3 py-1 text-white outline-2 hover:outline-offset-1 hover:outline outline-app rounded"
                 :title="link.tooltip"
-                target="_blank"
-                @click="trackOutboundClick(link.type)"
+                :target="link.type === 'yt' ? null : '_blank'"
+                @click.prevent="handleLinkClick(link)"
               >
                 <fa-icon
                   :icon="link.type | linkTypeIcon"
@@ -316,13 +315,7 @@ export default {
                 url: this.mapLink,
             }];
             
-            const dynamicLinks = this.point.links.map(link => {
-                if (link.type === 'yt') {
-                    return {...link, url: this.$H.ytLink(link.url)};
-                }
-
-                return link;
-            })
+            const dynamicLinks = this.point.links.map(link => ({...link}));
 
             return [
                 ...staticLinks,
@@ -346,6 +339,15 @@ export default {
 
             if (typeof link !== 'undefined') {
                 return this.$H.ytLink(link.url);
+            }
+
+            return null;
+        },
+        ytRawLink() {
+            const link = this.point.links.find(x => x.type === 'yt');
+
+            if (typeof link !== 'undefined') {
+                return link.url;
             }
 
             return null;
@@ -408,6 +410,24 @@ export default {
                 map_id: this.point.mapId,
                 link_type: linkType || 'link',
             });
+        },
+        handleYtClick(rawUrl) {
+            if (!rawUrl) {
+                return;
+            }
+
+            this.trackOutboundClick('yt');
+            this.$H.openYtLink(rawUrl);
+        },
+        handleLinkClick(link) {
+            this.trackOutboundClick(link.type);
+
+            if (link.type === 'yt') {
+                this.$H.openYtLink(link.url);
+                return;
+            }
+
+            window.open(link.url, '_blank', 'noopener,noreferrer');
         },
     },
 };

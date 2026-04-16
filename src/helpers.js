@@ -53,6 +53,8 @@ export const LINK_TYPE_TOOLTIPS = {
     ['news']: 'Zobacz artykuł dotyczący tego nagrania',
 }
 
+export const LS_YT_NATIVE_SUPPORTED = 'mi:yt-native-supported';
+
 export function isIos() {
     return _isMobile(window.navigator).apple.device;
 }
@@ -66,6 +68,18 @@ export function ytId(link) {
 }
 
 export function ytLink(link) {
+    if (isYtNativeSupported() === true) {
+        const native = ytNativeLink(link);
+
+        if (native) {
+            return native;
+        }
+    }
+
+    return link;
+}
+
+export function ytNativeLink(link) {
     if (isIos()) {
         return `youtube://${ytId(link)}`;
     }
@@ -73,8 +87,82 @@ export function ytLink(link) {
     if (isAndroid()) {
         return `vnd.youtube:${ytId(link)}`;
     }
-    
-    return link;
+
+    return null;
+}
+
+export function isYtNativeSupported() {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const raw = window.localStorage.getItem(LS_YT_NATIVE_SUPPORTED);
+    if (raw === '1') {
+        return true;
+    }
+    if (raw === '0') {
+        return false;
+    }
+
+    return null;
+}
+
+export function markYtNativeSupport(value) {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.localStorage.setItem(LS_YT_NATIVE_SUPPORTED, value ? '1' : '0');
+}
+
+export function openYtLink(link) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+        return;
+    }
+
+    // Desktop/laptop: always open YouTube in new tab.
+    if (!isIos() && !isAndroid()) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+        return;
+    }
+
+    const nativeUrl = ytNativeLink(link);
+    if (!nativeUrl) {
+        window.location.href = link;
+        return;
+    }
+
+    const supported = isYtNativeSupported();
+    if (supported === true) {
+        window.location.href = nativeUrl;
+        return;
+    }
+    if (supported === false) {
+        window.location.href = link;
+        return;
+    }
+
+    let hidden = false;
+    const onVisibility = () => {
+        if (document.visibilityState === 'hidden') {
+            hidden = true;
+        }
+    };
+
+    document.addEventListener('visibilitychange', onVisibility, true);
+    window.location.href = nativeUrl;
+
+    window.setTimeout(() => {
+        document.removeEventListener('visibilitychange', onVisibility, true);
+
+        if (hidden) {
+            markYtNativeSupport(true);
+            return;
+        }
+
+        markYtNativeSupport(false);
+        window.location.href = link;
+    }, 800);
 }
 
 export function linkTypeColor(type) {
@@ -228,6 +316,7 @@ export default {
             findIconDefinition,
             linkTypeDefaultTooltip,
             ytLink,
+            openYtLink,
         };
 
         Vue.mixin({

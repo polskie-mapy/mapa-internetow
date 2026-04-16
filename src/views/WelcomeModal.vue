@@ -31,8 +31,6 @@
                 <a
                   v-if="ytLink(point)"
                   :href="ytLink(point)"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   class="h-20 w-28 sm:h-24 sm:w-36 rounded overflow-hidden shrink-0"
                   @click.prevent="openYtFromThumbnail(point)"
                   @touchend.prevent="openYtFromThumbnail(point)"
@@ -131,6 +129,10 @@ export default {
             const yt = point.links.find((link) => link.type === 'yt');
             return yt ? this.$H.ytLink(yt.url) : null;
         },
+        ytRawLink(point) {
+            const yt = point.links.find((link) => link.type === 'yt');
+            return yt ? yt.url : null;
+        },
         ytThumb(point) {
             const yt = point.links.find((link) => link.type === 'yt');
             return yt ? this.$H.ytThumbUrl(yt.url) : null;
@@ -152,13 +154,13 @@ export default {
             });
         },
         openYtFromThumbnail(point) {
-            const link = this.ytLink(point);
+            const link = this.ytRawLink(point);
             if (!link) {
                 return;
             }
 
             this.trackOutboundLink(point, 'yt');
-            window.open(link, '_blank', 'noopener,noreferrer');
+            this.$H.openYtLink(link);
         },
         trackOutboundLink(point, linkType) {
             trackEvent('point_outbound_click', {
