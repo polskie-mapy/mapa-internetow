@@ -34,7 +34,7 @@
               :to="{ name: 'About' }"
               class="h-11 w-11 p-0 bg-white border-app border-2 shadow rounded hover:outline outline-2 outline-offset-1 dark:bg-gray-700 inline-flex items-center justify-center"
             >
-              <fa-icon icon="fa-solid fa-circle-exclamation" fixed-width />
+              <fa-icon icon="fa-solid fa-info" fixed-width />
             </router-link>
           </div>
         </l-control>
