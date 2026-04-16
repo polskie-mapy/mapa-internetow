@@ -27,7 +27,7 @@ export default {
         store.dispatch('initializeVisitContext');
 
         if (!store.getters.anyMapSelected && typeof to.params.mapId === 'undefined') {
-            store.commit('setCurrentMap', store.getters.defaultMap.id);
+            store.commit('setCurrentMap', store.getters.defaultMap);
 
             return next({
                 name: 'MapPage',

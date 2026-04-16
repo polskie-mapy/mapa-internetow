@@ -3,8 +3,9 @@
     <div
       class="absolute inset-0 z-modal bg-modal flex"
       @click.self.prevent="closeModal('backdrop')"
+      @touchend.self.prevent="closeModal('backdrop')"
     >
-      <div class="m-auto w-full max-w-3xl px-3 sm:px-4" @click.self.prevent="closeModal('backdrop')">
+      <div class="m-auto w-full max-w-3xl px-3 sm:px-4" @click.self.prevent="closeModal('backdrop')" @touchend.self.prevent="closeModal('backdrop')">
         <div class="bg-white dark:bg-gray-700 border-2 border-app rounded shadow cursor-auto max-h-[85vh] flex flex-col">
           <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex items-center gap-2">
             <div class="flex-1 min-w-0">
@@ -95,13 +96,32 @@ export default {
         }),
     },
     methods: {
-        closeModal(method = 'x') {
+        async closeModal(method = 'x') {
+            if (this._closingModal) {
+                return;
+            }
+
+            this._closingModal = true;
             this._closeTracked = true;
             trackEvent('welcome_modal_close', { method });
-            this.$router.push({
-                name: 'MapPage',
-                params: { mapId: Number.parseInt(this.$route.params.mapId, 10) },
-            });
+            const mapId = Number.parseInt(this.$route.params.mapId, 10);
+
+            try {
+                await this.$router.replace({
+                    name: 'MapPage',
+                    params: { mapId },
+                }).catch((err) => {
+                    if (err && err.name !== 'NavigationDuplicated') {
+                        throw err;
+                    }
+                });
+
+                if (this.$route.name === 'MapWelcome') {
+                    this.$router.back();
+                }
+            } finally {
+                this._closingModal = false;
+            }
         },
         mapLabel(mapId) {
             return this.mapLookup(mapId)?.name || 'Mapa';
