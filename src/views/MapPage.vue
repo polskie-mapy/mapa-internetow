@@ -94,21 +94,36 @@ export default {
     },
     methods: {
         async maybeOpenWelcomeModal() {
-            if (this.$route.name !== 'MapPage') {
+            if (this.$route.name !== 'MapPage' || this._openingWelcomeModal) {
                 return;
             }
 
-            const shouldOpen = await this.$store.dispatch('maybePrepareWelcomeModal');
-            if (!shouldOpen) {
-                return;
-            }
+            this._openingWelcomeModal = true;
+            try {
+                const shouldOpen = await this.$store.dispatch('maybePrepareWelcomeModal');
+                if (!shouldOpen) {
+                    return;
+                }
 
-            this.$router.push({
-                name: 'MapWelcome',
-                params: {
-                    mapId: this.$store.getters.currentMap.id,
-                },
-            });
+                const targetMapId = this.$store.getters.currentMap.id;
+                const currentRouteMapId = Number.parseInt(this.$route.params.mapId, 10);
+                if (this.$route.name === 'MapWelcome' && currentRouteMapId === targetMapId) {
+                    return;
+                }
+
+                await this.$router.push({
+                    name: 'MapWelcome',
+                    params: {
+                        mapId: targetMapId,
+                    },
+                }).catch((err) => {
+                    if (err && err.name !== 'NavigationDuplicated') {
+                        throw err;
+                    }
+                });
+            } finally {
+                this._openingWelcomeModal = false;
+            }
         },
         trackMapOpen(route) {
             const mapId = Number.parseInt(route.params.mapId, 10);
