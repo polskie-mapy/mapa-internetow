@@ -8,3 +8,5 @@ Projekt ma na celu zbieranie oraz oznaczanie miejsc, w których "tworzyła się 
 Aplikacja dostępna jest zarówno na komputerze, jak i telefonie.
 
 Dostępna jest ona pod adresem [mapainternetow.pl](https://mapainternetow.pl)
+
+Kontakt: hi@cvgo.re lub ronaldinhothc@gmail.com
