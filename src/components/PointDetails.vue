@@ -75,13 +75,23 @@
               </a>
             </div>
           </div>
-        <div class="col-span-2 text-sm -mt-2 text-black dark:text-white">
+          <div class="col-span-2 text-sm -mt-2 text-black dark:text-white">
             {{ map.name }}
-        </div>
+          </div>
+          <div
+            v-if="geoLocationName"
+            class="col-span-2 text-xs -mt-2 text-gray-500 dark:text-gray-300 inline-flex items-center gap-x-1"
+          >
+            <fa-icon icon="fa-solid fa-location-dot" />
+            <span>{{ geoLocationName }}</span>
+          </div>
           <div class="col-span-2 text-gray-500 dark:text-gray-300 text-xs gap-y-1 gap-x-3 md:flex hidden">
             <div>
               tagi:
-              <div v-if="point.tags.length" class="inline-flex gap-x-0.5">
+              <div
+                v-if="point.tags.length"
+                class="inline-flex gap-x-0.5"
+              >
                 <span
                   v-for="tag in point.tags"
                   :key="tag"
@@ -97,7 +107,10 @@
                 brak
               </span>
             </div>
-            <div v-if="difficultyValue > 0" class="inline-flex items-center gap-x-1">
+            <div
+              v-if="difficultyValue > 0"
+              class="inline-flex items-center gap-x-1"
+            >
               <span>trudność:</span>
               <span
                 v-for="starIdx in 5"
@@ -158,7 +171,11 @@
             <p class="break-all max-h-40 overflow-y-auto dark:text-gray-200">
               {{ point.excerpt }}
             </p>
-            <a class="text-app hover:underline" :href="mapLink" @click="trackOutboundClick('map')">
+            <a
+              class="text-app hover:underline"
+              :href="mapLink"
+              @click="trackOutboundClick('map')"
+            >
               <fa-icon 
                 icon="fa-solid fa-link"
                 fixed-width
@@ -183,7 +200,7 @@
           </div>
           <div class="flex gap-2 mb-3">
             <div>
-                <span class="dark:text-gray-200 text-sm">Linki:</span>
+              <span class="dark:text-gray-200 text-sm">Linki:</span>
             </div>
             <div
               v-for="link in links"
@@ -385,6 +402,15 @@ export default {
         },
         map() {
             return this.mapLookup(this.point.mapId);
+        },
+        geoLocationName() {
+            if (!this.point || typeof this.point.geoLocationName !== 'string') {
+                return null;
+            }
+
+            const value = this.point.geoLocationName.trim();
+
+            return value.length ? value : null;
         },
         proposeUrl: () => 'https://github.com/polskie-mapy/data/issues',
         ...mapGetters({

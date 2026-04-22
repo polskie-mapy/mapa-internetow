@@ -92,6 +92,9 @@ export default {
             });
         }
     },
+    mounted() {
+        this.maybeOpenWelcomeModal();
+    },
     methods: {
         async maybeOpenWelcomeModal() {
             if (this.$route.name !== 'MapPage' || this._openingWelcomeModal) {
@@ -145,9 +148,6 @@ export default {
                 source,
             });
         }
-    },
-    mounted() {
-        this.maybeOpenWelcomeModal();
     }
 };
 </script>

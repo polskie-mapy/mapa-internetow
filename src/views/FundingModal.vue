@@ -19,21 +19,30 @@
               class="flex-0 hover:text-app dark:text-white dark:hover:text-app"
               @click="closeModal"
             >
-              <fa-icon icon="fa-solid fa-times" fixed-width />
+              <fa-icon
+                icon="fa-solid fa-times"
+                fixed-width
+              />
             </button>
           </div>
           <p class="my-4 dark:text-gray-300">
             Jeśli podoba Ci się nasza praca i chcesz wesprzeć nas w dalszym jej
             rozwoju, możesz zrobić to na kilka sposobów:
           </p>
-          <ul class="space-y-2" v-if="false">
+          <ul
+            v-if="false"
+            class="space-y-2"
+          >
             <li>
               <a
                 href="https://www.ko-fi.com/ronaldinhothc"
                 target="_blank"
                 class="text-app hover:underline"
               >
-                <fa-icon icon="fa-solid fa-coffee" fixed-width />
+                <fa-icon
+                  icon="fa-solid fa-coffee"
+                  fixed-width
+                />
                 kupić nam kawę albo piwo
               </a>
             </li>
@@ -46,10 +55,10 @@
 
 <script>
 export default {
-  methods: {
-    closeModal() {
-      this.$router.back();
+    methods: {
+        closeModal() {
+            this.$router.back();
+        },
     },
-  },
 };
 </script>
