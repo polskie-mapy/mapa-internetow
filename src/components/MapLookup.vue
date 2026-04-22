@@ -49,39 +49,39 @@
         v-if="menuVisible && hasSearchResults && hasSearchQuery"
         class="flex flex-col bg-white border-app border-2 rounded shadow divide-y mb-3 dark:bg-gray-700"
       >
-          <template 
-            v-for="item in searchResults"
+        <template 
+          v-for="item in searchResults"
+        >
+          <router-link
+            v-if="item.type === 'point'"
+            :key="item.id"
+            :to="{ name: 'PointDetails', params: { pointId: item.id, mapId: item.mapId }, query: { source: 'search' } }"
+            class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black"
+            :title="item.title"
+            @click.native="trackSearchResultClick(item)"
           >
-              <router-link
-                  v-if="item.type === 'point'"
-                  :key="item.id"
-                  :to="{ name: 'PointDetails', params: { pointId: item.id, mapId: item.mapId }, query: { source: 'search' } }"
-                  class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black"
-                  :title="item.title"
-                  @click.native="trackSearchResultClick(item)"
-              >
-                  <fa-icon
-                      :icon="item.icon | iconCodeToIconName"
-                      fixed-width
-                      class="self-center"
-                  />
-                  <span class="text-ellipsis break-all w-full whitespace-nowrap overflow-x-hidden">{{ item.title }}</span>
-              </router-link>
-              <div
-                  v-else
-                  :key="item.id"
-                  :title="item.title"
-                  class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black cursor-pointer"
-                  @click="moveToLocation(item)"
-              >
-                  <fa-icon
-                      :icon="['fas', 'fa-map-marker-alt']"
-                      fixed-width
-                      class="self-center"
-                  />
-                  <span class="text-ellipsis break-all w-full whitespace-nowrap overflow-x-hidden">{{ item.title }}</span>
-              </div>
-          </template>
+            <fa-icon
+              :icon="item.icon | iconCodeToIconName"
+              fixed-width
+              class="self-center"
+            />
+            <span class="text-ellipsis break-all w-full whitespace-nowrap overflow-x-hidden">{{ item.title }}</span>
+          </router-link>
+          <div
+            v-else
+            :key="item.id"
+            :title="item.title"
+            class="py-2 px-4 flex gap-1 hover:bg-app hover:text-white border-transparent border last:mb-px dark:text-white dark:hover:text-black cursor-pointer"
+            @click="moveToLocation(item)"
+          >
+            <fa-icon
+              :icon="['fas', 'fa-map-marker-alt']"
+              fixed-width
+              class="self-center"
+            />
+            <span class="text-ellipsis break-all w-full whitespace-nowrap overflow-x-hidden">{{ item.title }}</span>
+          </div>
+        </template>
       </div>
       <div
         v-else-if="hasSearchQuery && !hasSearchResults && !performingSearch"
@@ -106,7 +106,10 @@
               class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
               @change="toggleRecentlyAddedFilter"
             >
-            <label for="ml-filter-recent" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+            <label
+              for="ml-filter-recent"
+              class="inline-block select-none cursor-pointer dark:text-white flex-1"
+            >
               Ostatnio dodane
             </label>
           </li>
@@ -118,7 +121,10 @@
               class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
               @change="toggleHardestFilter"
             >
-            <label for="ml-filter-hardest" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+            <label
+              for="ml-filter-hardest"
+              class="inline-block select-none cursor-pointer dark:text-white flex-1"
+            >
               Najtrudniejsze (4-5★)
             </label>
           </li>
@@ -130,7 +136,10 @@
               class="appearance-none h-6 w-6 border border-gray-300 rounded bg-white checked:bg-app checked:border-app hover:outline hover:outline-2 hover:outline-offset-1 hover:outline-app focus:outline-none align-top mr-2 cursor-pointer"
               @change="toggleUnseenFilter"
             >
-            <label for="ml-filter-unseen" class="inline-block select-none cursor-pointer dark:text-white flex-1">
+            <label
+              for="ml-filter-unseen"
+              class="inline-block select-none cursor-pointer dark:text-white flex-1"
+            >
               Nieobejrzane punkty
             </label>
           </li>
@@ -204,6 +213,17 @@ export default {
 
         }),
     },
+    watch: {
+        performingSearch(newValue, oldValue) {
+            if (oldValue === true && newValue === false && this.searchQuery.length > 1 && this.searchQuery !== this.lastTrackedQuery) {
+                trackEvent('search_use', {
+                    query_len: this.searchQuery.length,
+                    results_count: this.searchResults.length,
+                });
+                this.lastTrackedQuery = this.searchQuery;
+            }
+        },
+    },
     mounted() {
         this.$store.dispatch('search/initSearchIndex');
 
@@ -260,17 +280,6 @@ export default {
                 source: 'search_list',
             });
         }
-    },
-    watch: {
-        performingSearch(newValue, oldValue) {
-            if (oldValue === true && newValue === false && this.searchQuery.length > 1 && this.searchQuery !== this.lastTrackedQuery) {
-                trackEvent('search_use', {
-                    query_len: this.searchQuery.length,
-                    results_count: this.searchResults.length,
-                });
-                this.lastTrackedQuery = this.searchQuery;
-            }
-        },
     }
 }
 </script>

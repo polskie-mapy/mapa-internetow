@@ -15,8 +15,14 @@
             <p class="text-2xl font-bold flex-1">
               Projekt <code>mapainternetow.pl</code>
             </p>
-            <button class="flex-0 hover:text-app" @click="closeModal">
-              <fa-icon icon="fa-solid fa-times" fixed-width />
+            <button
+              class="flex-0 hover:text-app"
+              @click="closeModal"
+            >
+              <fa-icon
+                icon="fa-solid fa-times"
+                fixed-width
+              />
             </button>
           </div>
           <p class="mb-4 text-sm text-gray-400">
@@ -29,7 +35,10 @@
                 target="_blank"
                 class="text-app hover:underline"
               >
-                <fa-icon icon="fa-brands fa-instagram" fixed-width />
+                <fa-icon
+                  icon="fa-brands fa-instagram"
+                  fixed-width
+                />
                 Dane & pomysł by <b>RonaldinhoTHC</b>
               </a>
             </li>
@@ -39,7 +48,10 @@
                 target="_blank"
                 class="text-app hover:underline"
               >
-                <fa-icon icon="fa-solid fa-code" fixed-width />
+                <fa-icon
+                  icon="fa-solid fa-code"
+                  fixed-width
+                />
                 Apka by <b>cvgore</b>
               </a>
             </li>
@@ -49,7 +61,10 @@
                 target="_blank"
                 class="text-app hover:underline"
               >
-                <fa-icon icon="fa-brands fa-github" fixed-width />
+                <fa-icon
+                  icon="fa-brands fa-github"
+                  fixed-width
+                />
                 Repozytorium
               </a>
             </li>
@@ -59,7 +74,10 @@
                 target="_blank"
                 class="text-app hover:underline"
               >
-                <fa-icon icon="fa-solid fa-lightbulb" fixed-width />
+                <fa-icon
+                  icon="fa-solid fa-lightbulb"
+                  fixed-width
+                />
                 Zaproponuj pinezkę / zgłoś pinezkę
               </a>
             </li>
@@ -74,13 +92,13 @@
 import { mapGetters } from "vuex";
 
 export default {
-  computed: {
-    ...mapGetters(["version"]),
-  },
-  methods: {
-    closeModal() {
-      this.$router.back();
+    computed: {
+        ...mapGetters(["version"]),
     },
-  },
+    methods: {
+        closeModal() {
+            this.$router.back();
+        },
+    },
 };
 </script>

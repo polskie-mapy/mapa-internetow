@@ -5,7 +5,11 @@
       @click.self.prevent="closeModal('backdrop')"
       @touchend.self.prevent="closeModal('backdrop')"
     >
-      <div class="m-auto w-full max-w-3xl px-3 sm:px-4" @click.self.prevent="closeModal('backdrop')" @touchend.self.prevent="closeModal('backdrop')">
+      <div
+        class="m-auto w-full max-w-3xl px-3 sm:px-4"
+        @click.self.prevent="closeModal('backdrop')"
+        @touchend.self.prevent="closeModal('backdrop')"
+      >
         <div class="bg-white dark:bg-gray-700 border-2 border-app rounded shadow cursor-auto max-h-[85vh] flex flex-col">
           <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex items-center gap-2">
             <div class="flex-1 min-w-0">
@@ -16,8 +20,14 @@
                 Najnowsze punkty na mapach
               </p>
             </div>
-            <button class="h-11 w-11 inline-flex items-center justify-center rounded hover:text-app dark:text-white dark:hover:text-app" @click="closeModal('x')">
-              <fa-icon icon="fa-solid fa-times" fixed-width />
+            <button
+              class="h-11 w-11 inline-flex items-center justify-center rounded hover:text-app dark:text-white dark:hover:text-app"
+              @click="closeModal('x')"
+            >
+              <fa-icon
+                icon="fa-solid fa-times"
+                fixed-width
+              />
             </button>
           </div>
 
@@ -48,7 +58,11 @@
                   class="h-20 w-28 sm:h-24 sm:w-36 rounded overflow-hidden relative bg-gray-300 dark:bg-gray-600 shrink-0"
                 >
                   <div class="text-app bg-black/25 inset-0 absolute grid place-content-center">
-                    <fa-icon icon="fa-solid fa-video-slash" size="2x" fixed-width />
+                    <fa-icon
+                      icon="fa-solid fa-video-slash"
+                      size="2x"
+                      fixed-width
+                    />
                   </div>
                 </div>
 
@@ -93,6 +107,12 @@ export default {
             mapLookup: 'map',
             welcomeModalMode: 'welcomeModalMode',
         }),
+    },
+    mounted() {
+        trackEvent('welcome_modal_show', {
+            items_count: this.points.length,
+            mode: this.welcomeModalMode || 'latest_10',
+        });
     },
     methods: {
         async closeModal(method = 'x') {
@@ -176,12 +196,6 @@ export default {
                 source: 'welcome_modal',
             });
         },
-    },
-    mounted() {
-        trackEvent('welcome_modal_show', {
-            items_count: this.points.length,
-            mode: this.welcomeModalMode || 'latest_10',
-        });
     },
     beforeRouteLeave(to, _from, next) {
         if (!this._closeTracked && to.name === 'MapPage') {
